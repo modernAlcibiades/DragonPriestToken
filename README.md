@@ -20,8 +20,10 @@ DPT has no preallocation. All the tokens are up for grabs. The rewards are descr
 
 
 ## Actions & rewards (v1)
-Base Reward multiplier is set at `1000/(number of dragons alive)`. 
+All of your actions to take care of Dragons will be recorded and have corresponding rewards. The rewards can be seed in `dpt_earned` and can be claimed by calling `claim()`.
 
+
+Base Reward multiplier is set at `1000/(number of dragons alive)`. 
 For example, if there are 6 dragons alive, the Base Reward is 161 DPT. Detailed rewards are as follows:-
 
 `runBasic`
