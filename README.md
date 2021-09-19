@@ -23,33 +23,33 @@ Base Reward multiplier is set at `1000/(number of dragons alive)`.
 
 For example, if there are 6 dragons alive, the Base Reward is 161 DPT. Detailed rewards are as follows:-
 
-runBasic
-- Args : (address Dragon)
+`runBasic`
+- Args : `(address Dragon)`
 - Function : Runs all trust earning actions for a dragon (feed, play, sleep, clean)
-- Rewards : Base Reward * (Total reduction in boredom, uncleanliness, hunger, sleepines)/10
+- Rewards : `Base Reward * (Total reduction in boredom, uncleanliness, hunger, sleepines)/10`
   
-runHeal
-- Args : (address Dragon)
+`runHeal`
+- Args : `(address Dragon)`
 - Function : Heals the Dragon
-- Rewards : Base Reward * (Total health gain)/(health regeneration)
+- Rewards : `Base Reward * (Total health gain)/(health regeneration)`
 
-runUpgrade
-- Args : (address Dragon, int action)
+`runUpgrade`
+- Args : `(address Dragon, int action)`
 - Function : choose action to perform - 
   - 0 : Upgrade attack cooldown
   - 1 : Upgrade damage
   - 2 : Upgrade health regenration
   - 3 : Upgrade max health
-- Rewards : Base Reward
+- Rewards : `Base Reward`
 
 
-runBreed
-- Args : (string name)
+`runBreed`
+- Args : `(string name)`
 - Function : Find all possible dragons that can breed and call breed on them pairwise
-- Rewards : 2**(1+number of new eggs) * Base Reward
+- Rewards : `2**(1+number of new eggs) * Base Reward`
 
-runBreedSpecific
-- Args : (address parent1, address parent2, string name)
+`runBreedSpecific`
+- Args : `(address parent1, address parent2, string name)`
 - Function : Breed specific dragons
-- Rewards : Base Reward
+- Rewards : `Base Reward`
 ```
