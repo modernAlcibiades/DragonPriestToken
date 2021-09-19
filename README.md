@@ -19,7 +19,9 @@ Priest - controller from where you can call the tasks on the dragon, and earn DP
 
 
 ## Actions & rewards (v1)
-Base Reward multiplier is set at 1000/(number of dragons alive). For example, if there are 6 dragons alive, the Base Reward is 161 DPT. Detailed rewards are as follows:-
+Base Reward multiplier is set at `1000/(number of dragons alive)`. 
+
+For example, if there are 6 dragons alive, the Base Reward is 161 DPT. Detailed rewards are as follows:-
 
 runBasic
 - Args : (address Dragon)
