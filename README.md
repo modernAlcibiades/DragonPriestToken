@@ -13,9 +13,10 @@ This project is designed to leverage Lair of Wisdom to create a token for on-cha
 - This also resolves the problem of low trust
 
 ## Contracts
-DPT coin - ERC20
-Priest - controller from where you can call the tasks on the dragon, and earn DPT
+[DPT token](https://ftmscan.com/address/0x21c8c018fac4d79034291c66b2f29f6de4316810) - Incentive token for taking care of dragons
+[DragonPriest](https://ftmscan.com/address/0xd0f82f2d9cc60970b4263f828650aba8fe03532d) - controller from where you can call the tasks on the dragon, and earn DPT
 
+DPT has no preallocation. All the tokens are up for grabs. The rewards are described in next section. When there are fewer dragons, the rewards are higher.
 
 
 ## Actions & rewards (v1)
