@@ -62,7 +62,7 @@ describe("Breed", function () {
     console.log(parseInt(await priest.dpt_earned(deployer.address)));
 
     // Test upgrade
-    txn = await priest.connect(deployer).runUpgrade(alive_dragon.address, Math.floor(4 * random()));
+    txn = await priest.connect(deployer).runUpgrade(alive_dragon.address, 1);
     receipt = await txn.wait();
     console.log(receipt.events);
     console.log(await priest.dpt_earned(deployer.address));

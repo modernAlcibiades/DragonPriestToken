@@ -1,8 +1,66 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity 0.8.6;
 
-import "./Lair.sol";
-import "./Egg.sol";
+contract Lair {
+    Dragon[] dragons;
+    mapping(Dragon => bool) public isDragon;
+
+    Egg[] eggs;
+    mapping(Egg => bool) public isEgg;
+
+    constructor() {
+        address[2] memory parents = [address(0), address(0)];
+        Dragon leshner = new Dragon(address(0), this, parents, "Leshner");
+        dragons.push(leshner);
+        isDragon[leshner] = true;
+        emit DragonBirth(address(leshner), parents[0], parents[1]);
+        Dragon pleasr = new Dragon(address(0), this, parents, "Pleasr");
+        dragons.push(pleasr);
+        isDragon[pleasr] = true;
+        emit DragonBirth(address(pleasr), parents[0], parents[1]);
+    }
+
+    function fileDragonCertificate(
+        address[2] memory parents,
+        string memory name
+    ) external returns (Dragon dragon) {
+        require(isEgg[Egg(msg.sender)]);
+        dragon = new Dragon(msg.sender, this, parents, name);
+        dragons.push(dragon);
+        isDragon[dragon] = true;
+        emit DragonBirth(address(dragon), parents[0], parents[1]);
+    }
+
+    function fileEggCertificate(address[2] memory parents, string memory name)
+        external
+        returns (Egg egg)
+    {
+        require(isDragon[Dragon(msg.sender)]);
+        egg = new Egg(this, parents, name);
+        eggs.push(egg);
+        isEgg[egg] = true;
+        emit EggBirth(address(egg), parents[0], parents[1]);
+    }
+
+    function allDragons() public view returns (Dragon[] memory) {
+        return dragons;
+    }
+
+    function allEggs() public view returns (Egg[] memory) {
+        return eggs;
+    }
+
+    event DragonBirth(
+        address indexed dragon,
+        address indexed parent1,
+        address indexed parent2
+    );
+    event EggBirth(
+        address indexed egg,
+        address indexed parent1,
+        address indexed parent2
+    );
+}
 
 contract Dragon {
     uint256 constant UPGRADE_COOLDOWN = 1 hours;
@@ -346,4 +404,60 @@ contract Dragon {
         address egg,
         string childName
     );
+}
+
+contract Egg {
+    string public name;
+    uint256 constant BIRTH_DURATION = 24 hours;
+    address[2] public parents;
+    uint256 public creationTimestamp;
+    bool public born;
+    Lair public lair;
+    uint256 tributes;
+
+    constructor(
+        Lair _lair,
+        address[2] memory _parents,
+        string memory _name
+    ) {
+        name = _name;
+        parents = _parents;
+        lair = _lair;
+        creationTimestamp = block.timestamp;
+    }
+
+    function isHatched() public view returns (bool) {
+        return block.timestamp > creationTimestamp + BIRTH_DURATION - tributes;
+    }
+
+    function secondsUntilHatched() public view returns (uint256) {
+        if (isHatched()) {
+            return 0;
+        }
+
+        return block.timestamp - creationTimestamp + BIRTH_DURATION - tributes;
+    }
+
+    function getTributes() public view returns (uint256) {
+        return tributes / 100;
+    }
+
+    function giveTribute() public {
+        require(!isHatched(), "im already hatched");
+        if (tributes + 100 <= BIRTH_DURATION) {
+            tributes += 100;
+            emit Tribute(msg.sender);
+        }
+    }
+
+    function giveBirth() public returns (Dragon dragon) {
+        if (!born && isHatched()) {
+            dragon = lair.fileDragonCertificate(parents, name);
+            born = true;
+            emit Birth(msg.sender);
+        }
+    }
+
+    event Tribute(address indexed trainer);
+    event Birth(address indexed trainer);
 }

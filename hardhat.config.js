@@ -26,7 +26,7 @@ module.exports = {
       forking: {
         chainId: 250,
         url: "https://rpc.ftm.tools/",
-        blockNumber: 17304140,
+        blockNumber: 17305075,
         accounts: [process.env.PRIVATE_KEY]
       }
     },

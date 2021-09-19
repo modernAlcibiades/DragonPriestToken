@@ -6,7 +6,20 @@
 const hre = require("hardhat");
 
 let deployer, token, priest;
-let txn, receipt;
+let txn, receipt, nonce;
+let SLEEPMS = 1000;
+
+function sleep(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+async function wait_nonce() {
+    while (nonce == await deployer.getTransactionCount()) {
+        await sleep(SLEEPMS);
+        console.log("Nonce not updated", nonce);
+    }
+    nonce++;
+}
 
 async function main() {
     // Get account
@@ -23,20 +36,30 @@ async function main() {
 
     let initialSupply = 10 ** 8; // 100 million
     // Deploy token
+    //const Token = await ethers.getContractFactory("DragonPriestToken");
+    //token = await Token.connect(deployer).deploy(initialSupply);
+    //await token.deployed();
     const Token = await ethers.getContractFactory("DragonPriestToken");
-    token = await Token.connect(deployer).deploy(initialSupply);
-    await token.deployed();
+    token = await Token.attach("0xd0F82F2d9Cc60970b4263f828650aba8fE03532D");
+    console.log(await token.owner());
 
+    nonce = await deployer.getTransactionCount();
+    // Try removing previous priest address
+    txn = await token.connect(deployer).removePriest();
+    receipt = await txn.wait();
+    console.log(receipt.events);
 
     // Deploy priest contract
     const Priest = await ethers.getContractFactory("DragonPriest");
-    priest = await Priest.deploy(token.address);
+    priest = await Priest.connect(deployer).deploy(token.address);
     await priest.deployed();
 
     // set priest
-    txn = await token.setPriest(priest.address);
+    //nonce = await deployer.getTransactionCount();
+    txn = await token.connect(deployer).setPriest(priest.address);
     receipt = await txn.wait();
     console.log(receipt.events);
+    await wait_nonce();
 
     // check that priest address set
     console.log("Token address", token.address);

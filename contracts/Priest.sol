@@ -1,14 +1,15 @@
-// SPDX-License-Identifier: UNLICENSED
+// SPDX-License-Identifier: MIT
 pragma solidity 0.8.6;
 
-import "./Token.sol";
-import "./Dragon.sol";
-
-import "hardhat/console.sol";
+import "./VerifyDPT.sol";
+import "./LoWBase.sol";
 
 contract DragonPriest {
     DragonPriestToken token;
     Lair lair = Lair(0x83633dca596E741c80f4FA032C75518CC251B09b);
+
+    string ded = "Dragon is dead";
+    string notrust = "Not enough trust";
 
     mapping(address => uint256) public dpt_earned;
     mapping(address => bool) public is_living;
@@ -59,7 +60,9 @@ contract DragonPriest {
                 is_living[address(dragons[i])] = true;
             }
         }
-        num_living_dragons = current_dragons;
+        if (num_living_dragons != current_dragons) {
+            num_living_dragons = current_dragons;
+        }
         _;
     }
 
@@ -80,15 +83,13 @@ contract DragonPriest {
         if (high > low) {
             uint256 change = ((high - low) * BASE_MULTIPLIER) /
                 (num_living_dragons * divisor);
-            console.log(high, low, num_living_dragons, BASE_MULTIPLIER);
             dpt_earned[msg.sender] += change;
             emit Earned(msg.sender, change);
         }
     }
 
     function runBasic(Dragon dragon) public countDragons {
-        require(is_living[address(dragon)], "Dragon is dead");
-        //console.log("Basic for", dragon.name());
+        require(is_living[address(dragon)], ded);
         uint256 boredom = dragon.getBoredom();
         uint256 hunger = dragon.getHunger();
         uint256 sleepiness = dragon.getSleepiness();
@@ -106,7 +107,6 @@ contract DragonPriest {
             hunger += 10;
             sleepiness += 10;
             uncleanliness += 5;
-            //console.log("Play");
         }
 
         // check hunger
@@ -116,7 +116,6 @@ contract DragonPriest {
             hunger = 0;
             boredom += 10;
             uncleanliness += 3;
-            //console.log("Feed");
         }
 
         // check sleepy
@@ -125,7 +124,6 @@ contract DragonPriest {
 
             sleepiness = 0;
             uncleanliness += 5;
-            //console.log("sleep");
         }
 
         // execute script
@@ -133,7 +131,6 @@ contract DragonPriest {
             dragon.clean();
 
             uncleanliness = 0;
-            //console.log("clean");
         }
         // At the end, boredom = 10, everything else = 0 (given boredom and hunger < 80)
         award(
@@ -144,17 +141,17 @@ contract DragonPriest {
     }
 
     function runHeal(Dragon dragon) public countDragons {
-        require(is_living[address(dragon)], "Dragon is dead");
+        require(is_living[address(dragon)], ded);
+        require(dragon.trust(address(this)) > 1, notrust);
 
         uint256 initial_value = dragon.health();
         dragon.heal();
-        console.log(initial_value, dragon.health());
         award(dragon.health(), initial_value, dragon.healthRegeneration());
     }
 
     function runUpgrade(Dragon dragon, uint256 index) public countDragons {
-        require(is_living[address(dragon)], "Dragon is dead");
-
+        require(is_living[address(dragon)], ded);
+        require(dragon.trust(address(this)) > 5, notrust);
         if (dragon.canUpgrade()) {
             if (index % 4 == 0) {
                 dragon.upgradeAttackCooldown();
@@ -165,7 +162,7 @@ contract DragonPriest {
             } else if (index % 4 == 3) {
                 dragon.upgradeMaxHealth();
             }
-            award(0, 1, 1); //
+            award(0, 1, 1);
         }
     }
 
@@ -173,15 +170,20 @@ contract DragonPriest {
         Dragon parent1,
         Dragon parent2,
         string memory name
-    ) public countDragons returns (bool) {
+    ) public countDragons returns (bool success) {
         require(
             is_living[address(parent1)] && is_living[address(parent2)],
-            "Dragon is dead"
+            ded
         );
+        require(parent1.trust(address(this)) > 10, notrust);
+
         if (parent1.canBreed() && parent2.canBreed()) {
             parent1.breed(parent2, name);
             emit Breeding(address(parent1), address(parent2), name);
             award(0, 1, 1);
+            success = true;
+        } else {
+            success = false;
         }
     }
 
@@ -198,7 +200,7 @@ contract DragonPriest {
         for (uint256 i = 0; i < dragons.length; i++) {
             if (is_living[address(dragons[i])]) {
                 if (dragons[i].canBreed()) {
-                    if (parent_ready) {
+                    if (parent_ready && dragons[i].trust(address(this)) > 10) {
                         dragons[i].breed(parent, name);
                         birth_count += 1;
                         emit Breeding(
@@ -207,6 +209,7 @@ contract DragonPriest {
                             name
                         );
                         success = true;
+
                         parent_ready = false;
                     } else {
                         parent = dragons[i];
