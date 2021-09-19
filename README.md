@@ -52,4 +52,12 @@ For example, if there are 6 dragons alive, the Base Reward is 161 DPT. Detailed 
 - Args : `(address parent1, address parent2, string name)`
 - Function : Breed specific dragons
 - Rewards : `Base Reward`
+
+## Deployment
+```
+Token address 0xd0F82F2d9Cc60970b4263f828650aba8fE03532D
+Priest address 0xe8E01191910189eC8A5EbB262b3CA30160379024
+Initial supply 100000000
+```
+
 ```
