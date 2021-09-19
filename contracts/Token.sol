@@ -11,7 +11,7 @@ contract DragonPriestToken is ERC20, Ownable {
     event SetPriest(address Priest);
     event RemovedPriest();
 
-    constructor(uint256 initialSupply) ERC20("Lair of Wisdom Token", "LOWT") {
+    constructor(uint256 initialSupply) ERC20("Dragon Priest Token", "DPT") {
         priest = address(0);
         _mint(address(this), initialSupply);
     }
