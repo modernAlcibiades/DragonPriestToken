@@ -10,7 +10,7 @@ function sleep(ms) {
 }
 
 async function wait_nonce() {
-    while (nonce == await deployer.getTransactionCount()) {
+    while (network.name == 'fantom' && nonce == await deployer.getTransactionCount()) {
         await sleep(SLEEPMS);
         console.log("Nonce not updated", nonce);
     }
@@ -35,16 +35,13 @@ async function main() {
     const lair = await Lair.attach("0x83633dca596e741c80f4fa032c75518cc251b09b");
 
     const Priest = await ethers.getContractFactory("DragonPriest");
-    priest = await Priest.attach("0x21c8c018fac4d79034291c66b2f29f6de4316810");
+    priest = await Priest.attach("0x5c0Fc0B88206686f297ee096c0043b96CE8D81F7");
 
     nonce = await deployer.getTransactionCount();
 
     const Dragon = await ethers.getContractFactory("Dragon");
     let dragons_list;
     dragons_list = await lair.allDragons();
-
-    console.log("name, maxHealth, trust, boredom, hunger, sleepiness, uncleanliness, attacktime");
-
     // functions
     async function getDragonInfo(addr) {
         const dragon = await Dragon.attach(addr);
@@ -59,13 +56,15 @@ async function main() {
             uncleanliness: parseInt(await dragon.getUncleanliness()),
             health: parseInt(await dragon.health()),
             maxHealth: parseInt(await dragon.maxHealth()),
-            canUpgrade: await dragon.canUpgrade()
+            canUpgrade: await dragon.canUpgrade(),
+            canBreed: await dragon.canBreed()
         }
         return state;
     }
 
     async function runJobs(state) {
         try {
+            const dragon = await Dragon.attach(state.address);
             // Earn trust
             console.log("Basic job", state.dname);
             txn = await priest.runBasic(state.address);
@@ -74,6 +73,7 @@ async function main() {
             await wait_nonce();
 
             // Heal
+            state.trust = parseInt(await dragon.trust(priest.address));
             if (state.health < 0.8 * state.maxHealth && state.trust > 1) {
                 console.log("Healing", state.dname);
                 txn = await priest.runHeal(state.address);
@@ -83,6 +83,7 @@ async function main() {
             }
 
             // Upgrade
+            state.trust = parseInt(await dragon.trust(priest.address));
             if (state.canUpgrade && state.trust > 5) {
                 console.log("Upgrade", state.dname);
                 txn = await priest.runUpgrade(state.address, Math.floor(Math.random() * 4));

@@ -14,7 +14,6 @@ contract DragonPriest {
     mapping(address => uint256) public dpt_earned;
     mapping(address => bool) public is_living;
     uint256 public num_living_dragons;
-    uint256 public BASE_MULTIPLIER;
     uint256 public TRUST_EARN_DIVISOR = 10;
     uint256 public claimed = 0;
 
@@ -29,9 +28,11 @@ contract DragonPriest {
     constructor(address _token_addr) {
         token = DragonPriestToken(_token_addr);
         token.approve(_token_addr, token.totalSupply());
-        // Alpha tester rewards
-        dpt_earned[0x252DD902190Be0b9aCac625996fDa7137A4b684c] = 100000;
-        dpt_earned[0x83e79F5Fbe8D6dD7E8b44EE505c24bD9A77F5d02] = 100000;
+        // Alpha tester rewards : max 500,000
+        dpt_earned[0x252DD902190Be0b9aCac625996fDa7137A4b684c] = 100000 ether;
+        dpt_earned[0x83e79F5Fbe8D6dD7E8b44EE505c24bD9A77F5d02] = 100000 ether;
+
+        // Beta test rewards : max 500,000
     }
 
     // Check that dragon contract has not been destroyed
@@ -147,7 +148,7 @@ contract DragonPriest {
 
     function runHeal(Dragon dragon) public countDragons {
         require(is_living[address(dragon)], ded);
-        require(dragon.trust(address(this)) > 1, notrust);
+        require(dragon.trust(address(this)) >= 1, notrust);
 
         uint256 initial_value = dragon.health();
         dragon.heal();
@@ -156,7 +157,7 @@ contract DragonPriest {
 
     function runUpgrade(Dragon dragon, uint256 index) public countDragons {
         require(is_living[address(dragon)], ded);
-        require(dragon.trust(address(this)) > 5, notrust);
+        require(dragon.trust(address(this)) >= 5, notrust);
         if (dragon.canUpgrade()) {
             if (index % 4 == 0) {
                 dragon.upgradeAttackCooldown();

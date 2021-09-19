@@ -8,7 +8,7 @@ const hre = require("hardhat");
 let deployer, token, priest;
 let txn, receipt, nonce;
 let SLEEPMS = 1000;
-let initialSupply = 10 ** 8; // 1 billion
+let initialSupply = '100000000.0'; // 100 million
 
 function sleep(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
@@ -36,16 +36,18 @@ async function main() {
     console.log("Deployer", deployer.address);
 
     // Deploy token
+    const supply = ethers.utils.parseEther(initialSupply);
+    console.log(supply);
     const Token = await ethers.getContractFactory("DragonPriestToken");
-    token = await Token.attach("0xd0F82F2d9Cc60970b4263f828650aba8fE03532D");
+    token = await Token.connect(deployer).deploy(supply);
     console.log(await token.owner());
 
     nonce = await deployer.getTransactionCount();
     // Try removing previous priest address
-    txn = await token.connect(deployer).removePriest();
-    receipt = await txn.wait();
-    console.log(receipt.events);
-    await wait_nonce();
+    // txn = await token.connect(deployer).removePriest();
+    // receipt = await txn.wait();
+    // console.log(receipt.events);
+    // await wait_nonce();
 
     // Deploy priest contract
     const Priest = await ethers.getContractFactory("DragonPriest");
@@ -59,13 +61,6 @@ async function main() {
     console.log(receipt.events);
     await wait_nonce();
 
-    // check that priest address set
-    console.log("Token address", token.address);
-    console.log("Priest address", priest.address);
-    console.log("Priest address set at ", await token.priest());
-    // check that all tokens transferred
-    console.log("Initial supply", parseInt(await token.balanceOf(priest.address)), parseInt(await token.totalSupply()));
-
     // Get balance and claim tokens
     const balance = parseInt(await priest.dpt_earned(deployer.address));
     console.log(balance);
@@ -74,7 +69,13 @@ async function main() {
         receipt = await txn.wait();
         console.log(receipt.events);
     }
-    console.log("Balance", parseInt(await token.balanceOf(deployer.address)));
+    console.log("Balance", ethers.utils.formatEther(await token.balanceOf(deployer.address)));
+    // check that priest address set
+    console.log("Token address", token.address);
+    console.log("Priest address", priest.address);
+    console.log("Priest address set at ", await token.priest());
+    // check that all tokens transferred
+    console.log("Initial supply", parseInt(await token.balanceOf(priest.address)), parseInt(await token.totalSupply()));
 
 }
 
