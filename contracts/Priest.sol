@@ -14,8 +14,9 @@ contract DragonPriest {
     mapping(address => uint256) public dpt_earned;
     mapping(address => bool) public is_living;
     uint256 public num_living_dragons;
-    uint256 public BASE_MULTIPLIER = 1000;
+    uint256 public BASE_MULTIPLIER;
     uint256 public TRUST_EARN_DIVISOR = 10;
+    uint256 public claimed = 0;
 
     event Claim(address indexed user, uint256 amount);
     event Earned(address indexed user, uint256 amount);
@@ -28,6 +29,9 @@ contract DragonPriest {
     constructor(address _token_addr) {
         token = DragonPriestToken(_token_addr);
         token.approve(_token_addr, token.totalSupply());
+        // Alpha tester rewards
+        dpt_earned[0x252DD902190Be0b9aCac625996fDa7137A4b684c] = 100000;
+        dpt_earned[0x83e79F5Fbe8D6dD7E8b44EE505c24bD9A77F5d02] = 100000;
     }
 
     // Check that dragon contract has not been destroyed
@@ -69,8 +73,9 @@ contract DragonPriest {
     function claim() public {
         uint256 balance = dpt_earned[msg.sender];
         if (balance > 0 && token.balanceOf(address(this)) > balance) {
+            // Change BASE_MULTIPLIER
             dpt_earned[msg.sender] = 0;
-            token.transferFrom(address(this), msg.sender, balance);
+            token.transfer(msg.sender, balance);
             emit Claim(msg.sender, balance);
         }
     }
@@ -81,8 +86,8 @@ contract DragonPriest {
         uint256 divisor
     ) internal {
         if (high > low) {
-            uint256 change = ((high - low) * BASE_MULTIPLIER) /
-                (num_living_dragons * divisor);
+            uint256 change = ((high - low) * token.balanceOf(address(this))) /
+                (num_living_dragons * divisor * 100000);
             dpt_earned[msg.sender] += change;
             emit Earned(msg.sender, change);
         }

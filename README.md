@@ -59,8 +59,17 @@ For example, if there are 6 dragons alive, the Base Reward is 161 DPT. Detailed 
 ## Deployment
 ```
 Token address 0xd0F82F2d9Cc60970b4263f828650aba8fE03532D
-Priest address 0x21c8c018FaC4d79034291C66b2F29f6DE4316810
 Initial supply 100000000
+
+Dragon Priest address 0x5c0Fc0B88206686f297ee096c0043b96CE8D81F7
+- Fixed claim bug
+- Linearly diminishing rewards as the number of tokens  increases ie more DPT claimed => smaller DPT rewards
+
+Old Contracts
+v0 0x21c8c018FaC4d79034291C66b2F29f6DE4316810
+- could not process claims
+
+
 ```
 
 If you wish to support the project, add issues on Github, or fork the project. If you wish to support me, send some love to `0x252DD902190Be0b9aCac625996fDa7137A4b684c`

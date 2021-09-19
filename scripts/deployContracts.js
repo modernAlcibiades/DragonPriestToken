@@ -8,6 +8,7 @@ const hre = require("hardhat");
 let deployer, token, priest;
 let txn, receipt, nonce;
 let SLEEPMS = 1000;
+let initialSupply = 10 ** 8; // 1 billion
 
 function sleep(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
@@ -34,11 +35,7 @@ async function main() {
     }
     console.log("Deployer", deployer.address);
 
-    let initialSupply = 10 ** 8; // 100 million
     // Deploy token
-    //const Token = await ethers.getContractFactory("DragonPriestToken");
-    //token = await Token.connect(deployer).deploy(initialSupply);
-    //await token.deployed();
     const Token = await ethers.getContractFactory("DragonPriestToken");
     token = await Token.attach("0xd0F82F2d9Cc60970b4263f828650aba8fE03532D");
     console.log(await token.owner());
@@ -48,6 +45,7 @@ async function main() {
     txn = await token.connect(deployer).removePriest();
     receipt = await txn.wait();
     console.log(receipt.events);
+    await wait_nonce();
 
     // Deploy priest contract
     const Priest = await ethers.getContractFactory("DragonPriest");
@@ -67,6 +65,17 @@ async function main() {
     console.log("Priest address set at ", await token.priest());
     // check that all tokens transferred
     console.log("Initial supply", parseInt(await token.balanceOf(priest.address)), parseInt(await token.totalSupply()));
+
+    // Get balance and claim tokens
+    const balance = parseInt(await priest.dpt_earned(deployer.address));
+    console.log(balance);
+    if (balance > 0) {
+        txn = await priest.connect(deployer).claim();
+        receipt = await txn.wait();
+        console.log(receipt.events);
+    }
+    console.log("Balance", parseInt(await token.balanceOf(deployer.address)));
+
 }
 
 // We recommend this pattern to be able to use async/await everywhere
