@@ -60,4 +60,6 @@ Priest address 0xe8E01191910189eC8A5EbB262b3CA30160379024
 Initial supply 100000000
 ```
 
-```
+If you wish to support the project, add issues on Github, or fork the project. If you wish to support me, send some love to `0x252DD902190Be0b9aCac625996fDa7137A4b684c`
+
+Peace!!

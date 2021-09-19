@@ -3,8 +3,6 @@ pragma solidity 0.8.6;
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
-import "hardhat/console.sol";
-
 contract DragonPriestToken is ERC20, Ownable {
     address public priest;
 
